@@ -1,0 +1,17 @@
+If you have syntastic set up with vim, and you use git worktrees the way I do,
+then put these files in ~/.vim/ and add "source ~/.vim/syntasticrc.vim" to your
+~/.vimrc , and you will be able to do
+
+trillian:~/devel/github.com/grub2$ git branch origin/fedora-27 fedora-27-bls
+trillian:~/devel/github.com/grub2$ git worktree add fedora-27-bls fedora-27-bls
+trillian:~/devel/github.com/grub2$ cd fedora-27-bls
+trillian:~/devel/github.com/grub2/fedora-27-bls$ ./autogen.sh
+trillian:~/devel/github.com/grub2/fedora-27-bls$ mkdir build
+trillian:~/devel/github.com/grub2/fedora-27-bls$ cd build ; ../configure --whatever ; cd ..
+trillian:~/devel/github.com/grub2/fedora-27-bls$ vim <some_grub_file>
+trillian:~/devel/github.com/grub2/fedora-27-bls$ make -C build
+
+And syntastic should work correctly, with the assumption that you're on an
+x86_64 machine and you aren't hacking on code for another arch.  (that's
+probably possible to make work somewhat better, but it hasn't been worth the
+time.)
