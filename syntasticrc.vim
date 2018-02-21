@@ -1,6 +1,14 @@
 
-"let g:syntastic_debug = 0x3f
-"let g:syntastic_debug_file = "~/syntastic.log"
+
+function! EnableDebugSyntastic()
+  let g:syntastic_debug = 0x3f
+  let g:syntastic_debug_file = "~/syntastic.log"
+endfunction
+
+function! DisableDebugSyntastic()
+  unlet g:syntastic_debug
+  unlet g:syntastic_debug_file
+endfunction
 
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
@@ -40,9 +48,9 @@ endfunction
 function s:SetupSyntastic()
   if !exists("g:syntastic_vimrc")
     if has("autocmd")
-      augroup SyntasticVimRcOnce
-        au!
-      augroup END
+      "augroup SyntasticVimRcOnce
+      "  au!
+      "augroup END
     endif
     let l:cwd = getcwd()
     if l:cwd =~ ".*/grub2/.*"
@@ -96,34 +104,42 @@ function s:SetupSyntastic()
   endif
 endfunction
   
-function s:SetLittleS(afile)
+function s:SetLittleS()
   let g:syntastic_asm_compiler_options = '-x assembler -fsyntax-only'
   call s:SetupSyntastic()
 endfunction
 
-function s:SetBigS(afile)
+function s:SetBigS()
   let g:syntastic_asm_compiler_options = '-x assembler-with-cpp -fsyntax-only'
   call s:SetupSyntastic()
 endfunction
 
-function s:SetC(afile)
+function s:SetC()
   call s:SetupSyntastic()
 endfunction
 
-function s:SetH(afile)
+function s:SetH()
   call s:SetupSyntastic()
 endfunction
 
-function s:SetPython(afile)
+function s:SetPython()
   call s:SetupSyntastic()
+endfunction
+
+function s:SyntasticCheckOnce(afile)
+  call EnableSyntastic(a:afile)
+  call SyntasticCheck()
+  augroup EnableSyntastic
+    au!
+  augroup END
 endfunction
 
 function EnableSyntastic(afile)
   if v:vim_did_enter
-    let l:cwd=getcwd()
-    if l:cwd.'/'.a:afile =~ ".*/grub2/.*/util/.*"
+    " echomsg "a:afile: " . a:afile
+    if a:afile =~ ".*/grub2/.*/util/.*"
       let g:syntastic_c_config_file = '~/.vim/syntastic_grub_util_c_config'
-    elseif l:cwd.'/'.a:afile =~ ".*/grub2/.*"
+    elseif a:afile =~ ".*/grub2/.*"
       let g:syntastic_c_config_file = '~/.vim/syntastic_grub_c_config'
     endif
 
@@ -135,7 +151,11 @@ function EnableSyntastic(afile)
 
     let l:statusline=s:syntastic_statusline
   else
-    au VimEnter * call EnableSyntastic(expand("a:afile"))
+    let b:afile=a:afile
+    augroup EnableSyntastic
+      au!
+      au VimEnter * call s:SyntasticCheckOnce(b:afile)
+    augroup END
   endif
 endfunction
 
@@ -146,21 +166,23 @@ function DisableSyntastic()
           \ "active_filetypes": ["asm", "c", "cpp", "h", "python"],
           \ "passive_filetypes": ["text"]
           \ }
-    setlocal statusline = s:default_statusline
+    let l:statusline=s:default_statusline
   endif
 endfunction
 
 if has("autocmd")
   augroup SyntasticVimRc
     au!
-    auto BufRead,BufNewFile,BufWinEnter *.S :call s:SetBigS(expand("<afile>"))
-    auto BufRead,BufNewFile,BufWinEnter *.s :call s:SetLittleS(expand("<afile>"))
-    auto BufRead,BufNewFile,BufWinEnter *.c :call s:SetC(expand("<afile>"))
-    auto BufRead,BufNewFile,BufWinEnter *.h :call s:SetH(expand("<afile>"))
-    auto BufRead,BufNewFile *.S :call EnableSyntastic(expand("<afile>"))
-    auto BufRead,BufNewFile *.s :call EnableSyntastic(expand("<afile>"))
-    auto BufRead,BufNewFile *.c :call EnableSyntastic(expand("<afile>"))
-    auto BufRead,BufNewFile *.h :call EnableSyntastic(expand("<afile>"))
+    auto BufRead,BufNewFile,BufWinEnter *.S :call s:SetBigS()
+    auto BufRead,BufNewFile,BufWinEnter *.s :call s:SetLittleS()
+    auto BufRead,BufNewFile,BufWinEnter *.c :call s:SetC()
+    auto BufRead,BufNewFile,BufWinEnter *.h :call s:SetH()
+    auto BufRead,BufNewFile,BufWinEnter *.py :call s:SetPython()
+    auto BufRead,BufNewFile *.S :call EnableSyntastic(expand("<afile>:p"))
+    auto BufRead,BufNewFile *.s :call EnableSyntastic(expand("<afile>:p"))
+    auto BufRead,BufNewFile *.c :call EnableSyntastic(expand("<afile>:p"))
+    auto BufRead,BufNewFile *.h :call EnableSyntastic(expand("<afile>:p"))
+    auto BufRead,BufNewFile *.py :call EnableSyntastic(expand("<afile>:p"))
   augroup END
 
   augroup SyntasticVimRcOnce
