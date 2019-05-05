@@ -16,7 +16,7 @@ let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_mode_map = {
       \ "mode": "passive",
-      \ "active_filetypes": [],
+      \ "active_filetypes": ["rust", "rst"],
       \ "passive_filetypes": ["text", "asm", "c", "cpp", "h", "python"]
       \ }
 let g:syntastic_asm_generic = 1
@@ -99,6 +99,7 @@ function s:SetupSyntastic()
     let g:syntastic_warning_symbol = "!"
     let g:syntastic_python_pylint_exe = 'pylint-3'
     let g:syntastic_python_checkers = ['pylint']
+    let g:syntastic_rust_checkers = ['rustc']
     let g:syntastic_enable_signs = 1
     let g:syntastic_vimrc = 1
   endif
