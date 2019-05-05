@@ -94,8 +94,8 @@ function s:SetupSyntastic()
     let g:syntastic_cpp_remove_include_errors = 0
     " let g:loaded_syntastic_c_autoload = 1
     let g:syntastic_python_checkers = ['flake8']
-    " let g:syntastic_python_pylint_args = '--rcfile=.pylintrc'
-    " let g:syntastic_python_pylint3_args = '--rcfile=.pylintrc'
+    let g:syntastic_python_pylint_args = '--rcfile=/home/pjones/.pylintrc'
+    let g:syntastic_python_pylint3_args = '--rcfile=/home/pjones/.pylintrc'
     let g:syntastic_warning_symbol = "!"
     let g:syntastic_python_pylint_exe = 'pylint-3'
     let g:syntastic_python_checkers = ['pylint']
