@@ -90,8 +90,8 @@ function s:SetupSyntastic()
     let g:syntastic_c_compiler_options = ''
     let g:syntastic_c_no_default_include_dirs = 1
     let g:syntastic_c_include_from_cwd = 1
-    let g:syntastic_c_remove_include_errors = 1
-    let g:syntastic_cpp_remove_include_errors = 1
+    let g:syntastic_c_remove_include_errors = 0
+    let g:syntastic_cpp_remove_include_errors = 0
     " let g:loaded_syntastic_c_autoload = 1
     let g:syntastic_python_checkers = ['flake8']
     " let g:syntastic_python_pylint_args = '--rcfile=.pylintrc'
