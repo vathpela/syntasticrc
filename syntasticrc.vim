@@ -103,9 +103,12 @@ function s:SetupSyntastic()
     " let g:loaded_syntastic_c_autoload = 1
     let g:syntastic_python_checkers = ['flake8']
     let g:syntastic_python_pylint_args = '--rcfile=/home/pjones/.pylintrc'
+    let g:syntastic_python_pylint2_args = '--rcfile=/home/pjones/.pylintrc'
     let g:syntastic_python_pylint3_args = '--rcfile=/home/pjones/.pylintrc'
     let g:syntastic_warning_symbol = "!"
     let g:syntastic_python_pylint_exe = 'pylint-3'
+    let g:syntastic_python_pylint2_exe = 'pylint-3'
+    let g:syntastic_python_pylint3_exe = 'pylint-3'
     let g:syntastic_python_checkers = ['pylint']
     let g:syntastic_rust_checkers = ['rustc']
     let g:syntastic_enable_signs = 1
@@ -131,8 +134,13 @@ function s:SetH()
   call s:SetupSyntastic()
 endfunction
 
-function s:SetPython()
+function s:SetPython(afile)
   call s:SetupSyntastic()
+  if a:afile =~ ".*/devel/github.com/anaconda/"
+    let g:syntastic_python_pylint_args = '--rcfile=~/devel/github.com/anaconda/pylintrc'
+  elseif a:afile =~ ".*/devel/github.com/blivet/"
+    let g:syntastic_python_pylint_args = '--rcfile=~/devel/github.com/anaconda/pylintrc'
+  endif
 endfunction
 
 function s:SyntasticCheckOnce(afile)
@@ -179,6 +187,10 @@ function EnableSyntastic(afile)
     elseif a:afile =~ ".*/grub2/.*mips.*"
       call MakeGrubIncludeLinks("mips")
       let g:syntastic_c_config_file = '~/.vim/syntastic_grub_mips_c_config'
+    elseif a:afile =~ ".*fwupdate/.*/efi/.*"
+      let g:syntastic_c_config_file = '~/devel/github.com/fwupdate/.syntastic_efi_c_config'
+    elseif a:afile =~ ".*fwupdate/.*/linux/.*"
+      let g:syntastic_c_config_file = '~/devel/github.com/fwupdate/.syntastic_linux_c_config'
     elseif !exists("g:syntastic_c_config_file")
       if a:afile =~ ".*/grub2/.*"
         let g:syntastic_c_config_file = '~/.vim/syntastic_grub_c_config'
@@ -226,7 +238,7 @@ function EnableSyntastic(afile)
     let g:syntastic_mode_map = {
           \ "mode": "active",
           \ "active_filetypes": ["asm", "c", "cpp", "h", "python"],
-          \ "passive_filetypes": ["text"]
+          \ "passive_filetypes": ["text", "rst", "mail"]
           \ }
 
     let l:statusline=s:syntastic_statusline
@@ -244,7 +256,7 @@ function DisableSyntastic()
     let g:syntastic_mode_map = {
           \ "mode": "passive",
           \ "active_filetypes": ["asm", "c", "cpp", "h", "python"],
-          \ "passive_filetypes": ["text"]
+          \ "passive_filetypes": ["text", "rst", "mail"]
           \ }
     let l:statusline=s:default_statusline
   endif
@@ -257,7 +269,7 @@ if has("autocmd")
     auto BufRead,BufNewFile,BufWinEnter *.s :call s:SetLittleS()
     auto BufRead,BufNewFile,BufWinEnter *.c :call s:SetC()
     auto BufRead,BufNewFile,BufWinEnter *.h :call s:SetH()
-    auto BufRead,BufNewFile,BufWinEnter *.py :call s:SetPython()
+    auto BufRead,BufNewFile,BufWinEnter *.py :call s:SetPython(expand("<afile>:p"))
     auto BufRead,BufNewFile *.S :call EnableSyntastic(expand("<afile>:p"))
     auto BufRead,BufNewFile *.s :call EnableSyntastic(expand("<afile>:p"))
     auto BufRead,BufNewFile *.c :call EnableSyntastic(expand("<afile>:p"))
