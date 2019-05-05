@@ -80,10 +80,18 @@ function s:SetupSyntastic()
       let g:syntastic_c_compiler = "mips-linux-gnu-gcc"
       let g:syntastic_cpp_compiler = "mips-linux-gnu-cpp"
       let g:syntastic_asm_compiler = "mips-linux-gnu-gcc"
-    else
-      let g:syntastic_c_compiler = "gcc"
-      let g:syntastic_cpp_compiler = "cpp"
-      let g:syntastic_asm_compiler = "gcc"
+    elseif l:cwd =~ ".*u-boot.*"
+      let g:syntastic_c_compiler = "aarch64-linux-gnu-gcc"
+      let g:syntastic_cpp_compiler = "aarch64-linux-gnu-cpp"
+      let g:syntastic_asm_compiler = "aarch64-linux-gnu-gcc"
+    elseif l:cwd =~ ".*hc16.*"
+      let g:syntastic_c_compiler = "avr-gcc"
+      let g:syntastic_cpp_compiler = "avr-cpp"
+      let g:syntastic_asm_compiler = "avr-gcc"
+    elseif l:cwd =~ ".*bdm-gdb.*"
+      let g:syntastic_c_compiler = "avr-gcc"
+      let g:syntastic_cpp_compiler = "avr-cpp"
+      let g:syntastic_asm_compiler = "avr-gcc"
     endif
     let g:syntastic_asm_remove_include_errors = 1
     let g:syntastic_asm_compiler_options = '-x assembler-with-cpp -fsyntax-only'
@@ -135,13 +143,84 @@ function s:SyntasticCheckOnce(afile)
   augroup END
 endfunction
 
+function SymLink(from, to)
+  call system("ln -sf" . " " . a:from . " " . a:to)
+endfunction
+
+function MakeGrubIncludeLinks(arch)
+  let l:dir = getcwd() . "/build/include/grub/"
+  call mkdir(l:dir, 'p', 0755)
+  silent! call delete(l:dir . "cpu")
+  silent! call SymLink("../../../include/grub/" . a:arch, l:dir . "cpu")
+  silent! call delete(l:dir . "machine")
+  silent! call SymLink("../../../include/grub/" . a:arch, l:dir . "machine")
+endfunction
+
 function EnableSyntastic(afile)
   if v:vim_did_enter
     " echomsg "a:afile: " . a:afile
-    if a:afile =~ ".*/grub2/.*/util/.*"
+    if a:afile =~ ".*/grub2/.*/util/.*" || a:afile =~ ".*grub2/.*/osdep/.*"
       let g:syntastic_c_config_file = '~/.vim/syntastic_grub_util_c_config'
-    elseif a:afile =~ ".*/grub2/.*"
-      let g:syntastic_c_config_file = '~/.vim/syntastic_grub_c_config'
+    elseif a:afile =~ ".*/grub2/.*sparc64.*" || a:afile =~ ".*/grub2/.*halstation.*"
+      call MakeGrubIncludeLinks("sparc64")
+      let g:syntastic_c_config_file = '~/.vim/syntastic_grub_sparc64_c_config'
+    elseif a:afile =~ ".*/grub2/.*sparc.*"
+      call MakeGrubIncludeLinks("sparc")
+      let g:syntastic_c_config_file = '~/.vim/syntastic_grub_sparc_c_config'
+    elseif a:afile =~ ".*/grub2/.*arm64.*" || a:afile =~ ".*/grub2/.*aarch64.*"
+      call MakeGrubIncludeLinks("arm64")
+      let g:syntastic_c_config_file = '~/.vim/syntastic_grub_arm64_c_config'
+    elseif a:afile =~ ".*/grub2/.*arm.*"
+      call MakeGrubIncludeLinks("arm")
+      let g:syntastic_c_config_file = '~/.vim/syntastic_grub_arm_c_config'
+    elseif a:afile =~ ".*/grub2/.*mips64.*"
+      call MakeGrubIncludeLinks("mips64")
+      let g:syntastic_c_config_file = '~/.vim/syntastic_grub_mips64_c_config'
+    elseif a:afile =~ ".*/grub2/.*mips.*"
+      call MakeGrubIncludeLinks("mips")
+      let g:syntastic_c_config_file = '~/.vim/syntastic_grub_mips_c_config'
+    elseif !exists("g:syntastic_c_config_file")
+      if a:afile =~ ".*/grub2/.*"
+        let g:syntastic_c_config_file = '~/.vim/syntastic_grub_c_config'
+      else
+        let g:syntastic_c_config_file = '.syntastic_c_config'
+      endif
+    endif
+
+    if a:afile =~ ".*/grub2/.*sparc64.*" || a:afile =~ ".*/grub2/.*halstation.*"
+      let g:syntastic_c_compiler = "sparc64-linux-gnu-gcc"
+      let g:syntastic_cpp_compiler = "sparc64-linux-gnu-cpp"
+      let g:syntastic_asm_compiler = "sparc64-linux-gnu-gcc"
+    elseif a:afile =~ ".*/grub2/.*sparc.*"
+      let g:syntastic_c_compiler = "sparc-linux-gnu-gcc"
+      let g:syntastic_cpp_compiler = "sparc-linux-gnu-cpp"
+      let g:syntastic_asm_compiler = "sparc-linux-gnu-gcc"
+    elseif a:afile =~ ".*/grub2/.*arm64.*" || a:afile =~ ".*/grub2/.*aarch64.*"
+      let g:syntastic_c_compiler = "aarch64-linux-gnu-gcc"
+      let g:syntastic_cpp_compiler = "aarch64-linux-gnu-cpp"
+      let g:syntastic_asm_compiler = "aarch64-linux-gnu-gcc"
+    elseif a:afile =~ ".*/grub2/.*arm.*"
+      let g:syntastic_c_compiler = "arm-linux-gnu-gcc"
+      let g:syntastic_cpp_compiler = "arm-linux-gnu-cpp"
+      let g:syntastic_asm_compiler = "arm-linux-gnu-gcc"
+    elseif a:afile =~ ".*/grub2/.*mips64.*"
+      let g:syntastic_c_compiler = "mips64-linux-gnu-gcc"
+      let g:syntastic_cpp_compiler = "mips64-linux-gnu-cpp"
+      let g:syntastic_asm_compiler = "mips64-linux-gnu-gcc"
+    elseif a:afile =~ ".*/grub2/.*mips.*"
+      let g:syntastic_c_compiler = "mips-linux-gnu-gcc"
+      let g:syntastic_cpp_compiler = "mips-linux-gnu-cpp"
+      let g:syntastic_asm_compiler = "mips-linux-gnu-gcc"
+    else
+      if !exists("g:syntastic_c_compiler")
+        let g:syntastic_c_compiler = "gcc"
+      endif
+      if !exists("g:syntastic_cpp_compiler")
+        let g:syntastic_cpp_compiler = "cpp"
+      endif
+      if !exists("g:syntastic_asm_compiler")
+        let g:syntastic_asm_compiler = "gcc"
+      endif
     endif
 
     let g:syntastic_mode_map = {
